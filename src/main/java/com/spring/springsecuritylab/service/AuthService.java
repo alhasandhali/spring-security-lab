@@ -1,9 +1,10 @@
 package com.spring.springsecuritylab.service;
 
 
-import com.spring.springsecuritylab.entity.User;
+import com.spring.springsecuritylab.dto.RegisterResponse;
+import com.spring.springsecuritylab.dto.LoginResponse;
 
 public interface AuthService {
-    String register(User user);
-    String login(String email, String password);
+    RegisterResponse register(String email, String password);
+    LoginResponse login(String email, String password);
 }
