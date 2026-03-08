@@ -1,5 +1,6 @@
 package com.spring.springsecuritylab.service.implement;
 
+import com.spring.springsecuritylab.entity.Role;
 import com.spring.springsecuritylab.service.JwtUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,9 +16,10 @@ public class JwtUtilImpl implements JwtUtil {
     private String secret;
 
     @Override
-    public String generateToken(String email){
+    public String generateToken(String email, Role role){
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
@@ -30,5 +32,25 @@ public class JwtUtilImpl implements JwtUtil {
                 .setSigningKey(secret.getBytes())
                 .build()
                 .parseClaimsJws(token).getBody().getSubject();
+    }
+
+    @Override
+    public Date extractExpiration(String token) {
+        return Jwts.parser()
+                .setSigningKey(secret.getBytes())
+                .build()
+                .parseClaimsJws(token).getBody().getExpiration();
+    }
+
+    @Override
+    public boolean isTokenNotExpired(String token) {
+        return extractExpiration(token).after(new Date());
+    }
+
+    @Override
+    public boolean validateToken(String token, String email) {
+        String tokenEmail = extractEmail(token);
+
+        return tokenEmail.equals(email) && isTokenNotExpired(token);
     }
 }
